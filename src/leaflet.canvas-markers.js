@@ -136,9 +136,11 @@
         this._context.clearRect(0, 0, this._canvas.width, this._canvas.height);
       }
 
-      Object.keys(this._markers).forEach(function(item){
-        this._drawMarker(this._markers[item]);
-      }, this)
+      if (this._markers) {
+        Object.keys(this._markers).forEach(function(item){
+          this._drawMarker(this._markers[item]);
+        }, this)
+      }
     },
 
     _initCanvas: function () {
