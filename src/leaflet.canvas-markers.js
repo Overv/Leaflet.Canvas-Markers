@@ -39,6 +39,8 @@
 
       this._markers[marker._leaflet_id] = marker;
 
+      marker.on('move', this._reset, this);
+
       this._drawMarker(marker);
     },
 
@@ -72,7 +74,8 @@
         map._panes.overlayPane.appendChild(this._canvas);
       }
 
-      map.on('moveend', this._reset, this);
+      map.on('move', this._reset, this);
+      map.on('zoom', this._reset, this);
       map.on('click', this._executeClickListeners, this);
     },
 
