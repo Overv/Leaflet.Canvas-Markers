@@ -122,13 +122,27 @@
     _drawImage: function (marker, pointPos) {
       this._context.globalAlpha = marker.options.opacity;
 
-      this._context.drawImage(
+      if (marker.options.icon.options.iconOrigin) {
+        this._context.drawImage(
+          this.imageCache[marker.options.icon.options.iconUrl],
+          marker.options.icon.options.iconOrigin[0],
+          marker.options.icon.options.iconOrigin[1],
+          marker.options.icon.options.iconSize[0],
+          marker.options.icon.options.iconSize[1],
+          pointPos.x - marker.options.icon.options.iconAnchor[0],
+          pointPos.y - marker.options.icon.options.iconAnchor[1],
+          marker.options.icon.options.iconSize[0],
+          marker.options.icon.options.iconSize[1]
+        );
+      } else {
+        this._context.drawImage(
           this.imageCache[marker.options.icon.options.iconUrl],
           pointPos.x - marker.options.icon.options.iconAnchor[0],
           pointPos.y - marker.options.icon.options.iconAnchor[1],
           marker.options.icon.options.iconSize[0],
           marker.options.icon.options.iconSize[1]
         );
+      }
     },
 
     _reset: function () {
