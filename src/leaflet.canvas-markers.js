@@ -41,9 +41,19 @@
 
       this._markers[marker._leaflet_id] = marker;
 
-      // marker.on('move', this._reset, this);
+      var self = this;
+      marker.on('move', this._scheduleRedraw, this);
 
       this._drawMarker(marker);
+    },
+
+    _scheduleRedraw: function() {
+      if (!this._frame) {
+        var self = this;
+        this._frame = L.Util.requestAnimFrame(function() {
+          self._redraw(true);
+        });
+      }
     },
 
     addLayer: function (layer) {
@@ -134,6 +144,8 @@
     },
 
     _redraw: function (clear) {
+      this._frame = null;
+
       if (!this._map) {
           return;
       }
