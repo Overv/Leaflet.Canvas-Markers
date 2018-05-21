@@ -17,6 +17,8 @@
 }(function (L){
   var CanvasIconLayer = (L.Layer ? L.Layer : L.Class).extend({
     initialize: function (options) {
+      this.imageCache = {};
+
       L.setOptions(this, options);
     },
 
@@ -39,7 +41,7 @@
 
       this._markers[marker._leaflet_id] = marker;
 
-      marker.on('move', this._reset, this);
+      // marker.on('move', this._reset, this);
 
       this._drawMarker(marker);
     },
@@ -96,14 +98,13 @@
       var self = this;
 
       var pointPos = this._map.latLngToContainerPoint(marker.getLatLng());
+      var iconUrl = marker.options.icon.options.iconUrl;
 
-      if (!marker.canvas_img){
-        marker.canvas_img = new Image();
-        marker.canvas_img.src = marker.options.icon.options.iconUrl;
-        marker.canvas_img.onload = function() {
-          self._drawImage(marker, pointPos);
-        }
-      } else if (marker.canvas_img.complete && marker.canvas_img.naturalWidth !== 0) {
+      if (!this.imageCache[iconUrl]) {
+        this.imageCache[iconUrl] = new Image();
+        this.imageCache[iconUrl].src = iconUrl;
+        this.imageCache[iconUrl].onload = (function(self) { self._reset(); })(this);
+      } else if (this.imageCache[iconUrl] && this.imageCache[iconUrl].complete && this.imageCache[iconUrl].naturalWidth !== 0) {
         self._drawImage(marker, pointPos);
       }
     },
@@ -112,7 +113,7 @@
       this._context.globalAlpha = marker.options.opacity;
 
       this._context.drawImage(
-          marker.canvas_img,
+          this.imageCache[marker.options.icon.options.iconUrl],
           pointPos.x - marker.options.icon.options.iconAnchor[0],
           pointPos.y - marker.options.icon.options.iconAnchor[1],
           marker.options.icon.options.iconSize[0],
