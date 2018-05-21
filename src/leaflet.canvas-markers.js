@@ -100,7 +100,7 @@
         marker.canvas_img.onload = function() {
           self._drawImage(marker, pointPos);
         }
-      } else {
+      } else if (marker.canvas_img.complete && marker.canvas_img.naturalWidth !== 0) {
         self._drawImage(marker, pointPos);
       }
     },
