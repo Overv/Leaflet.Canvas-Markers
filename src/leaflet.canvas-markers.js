@@ -106,6 +106,8 @@
     },
 
     _drawImage: function (marker, pointPos) {
+      this._context.globalAlpha = marker.options.opacity;
+
       this._context.drawImage(
           marker.canvas_img,
           pointPos.x - marker.options.icon.options.iconAnchor[0],
