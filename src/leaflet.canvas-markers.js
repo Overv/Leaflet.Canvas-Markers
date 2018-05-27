@@ -18,6 +18,7 @@
   var CanvasIconLayer = (L.Layer ? L.Layer : L.Class).extend({
     initialize: function (options) {
       this.imageCache = {};
+      this.zIndex = 0;
 
       L.setOptions(this, options);
     },
@@ -89,6 +90,7 @@
       map.on('move', this._reset, this);
       map.on('zoom', this._reset, this);
       map.on('click', this._executeClickListeners, this);
+      map.on('mousemove', this._updateMouseCursor, this);
     },
 
     onRemove: function (map) {
@@ -121,6 +123,7 @@
 
     _drawImage: function (marker, pointPos) {
       this._context.globalAlpha = marker.options.opacity;
+      marker._zIndex = this.zIndex++;
 
       if (marker.options.icon.options.iconOrigin) {
         this._context.drawImage(
@@ -159,6 +162,7 @@
 
     _redraw: function (clear) {
       this._frame = null;
+      this.zIndex = 0;
 
       if (!this._map) {
           return;
@@ -198,28 +202,53 @@
 
     },
 
-    addOnClickListener: function (listener) {
-      this._onClickListeners.push(listener);
-    },
-
     _executeClickListeners: function(event) {
+      var highestMarker = null;
+
       for (var markerId in this._markers) {
         var marker = this._markers[markerId];
         var point = this._map.latLngToContainerPoint(this._markers[markerId].getLatLng());
 
-        if (this._hit(marker, point, event)) {
-          this._onClickListeners.forEach(function(listener) { listener(event); });
+        if (this._hit(marker, point, event) && marker.options.opacity > 0.0) {
+          if (!highestMarker || marker._zIndex > highestMarker._zIndex) {
+            highestMarker = marker;
+          }
+        }
+      }
+
+      if (highestMarker) {
+        highestMarker.fire('click');
+      }
+    },
+
+    _updateMouseCursor: function(event) {
+      var markerHit = false;
+
+      for (var markerId in this._markers) {
+        var marker = this._markers[markerId];
+        var point = this._map.latLngToContainerPoint(this._markers[markerId].getLatLng());
+
+        if (this._hit(marker, point, event) && marker.options.opacity > 0.0) {
+          markerHit = true;
           break;
         }
+      }
+
+      if (markerHit) {
+        this._map._container.style.cursor = 'pointer';
+      } else {
+        this._map._container.style.cursor = '';
       }
     },
 
     _hit: function(marker, point, event) {
-      var halfWidth = marker.options.icon.options.iconSize[0] / 2;
-      var halfHeight = marker.options.icon.options.iconSize[1] / 2;
+      var width = marker.options.icon.options.iconSize[0];
+      var height = marker.options.icon.options.iconSize[1];
+      var offsetWidth = marker.options.icon.options.iconAnchor[0];
+      var offsetHeight = marker.options.icon.options.iconAnchor[1];
       var x = event.containerPoint.x;
       var y = event.containerPoint.y;
-      return x <= point.x + halfWidth && x >= point.x - halfWidth && y >= point.y - halfHeight && y <= point.y + halfHeight;
+      return x >= point.x - offsetWidth && x <= point.x - offsetWidth + width && y >= point.y - offsetHeight && y <= point.y - offsetHeight + height;
     },
 
     /*
