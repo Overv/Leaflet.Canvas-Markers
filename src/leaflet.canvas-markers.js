@@ -110,6 +110,8 @@
       var self = this;
 
       var pointPos = this._map.latLngToContainerPoint(marker.getLatLng());
+
+      if (!marker.options.icon) return;
       var iconUrl = marker.options.icon.options.iconUrl;
 
       if (!this.imageCache[iconUrl]) {
@@ -239,7 +241,7 @@
         var marker = this._markers[markerId];
         var point = this._map.latLngToContainerPoint(this._markers[markerId].getLatLng());
 
-        if (this._hit(marker, point, event) && marker.options.opacity > 0.0) {
+        if (marker.options.opacity > 0.0 && marker.options.icon && this._hit(marker, point, event)) {
           markerHit = true;
           break;
         }
