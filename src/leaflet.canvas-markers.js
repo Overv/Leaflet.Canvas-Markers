@@ -113,9 +113,10 @@
       var iconUrl = marker.options.icon.options.iconUrl;
 
       if (!this.imageCache[iconUrl]) {
+        var self = this;
         this.imageCache[iconUrl] = new Image();
+        this.imageCache[iconUrl].onload = function() { self._scheduleRedraw(); };
         this.imageCache[iconUrl].src = iconUrl;
-        this.imageCache[iconUrl].onload = (function(self) { self._reset(); })(this);
       } else if (this.imageCache[iconUrl] && this.imageCache[iconUrl].complete && this.imageCache[iconUrl].naturalWidth !== 0) {
         self._drawImage(marker, pointPos);
       }
@@ -124,6 +125,13 @@
     _drawImage: function (marker, pointPos) {
       this._context.globalAlpha = marker.options.opacity;
       marker._zIndex = this._zIndex++;
+
+      var iconWidth = marker.options.icon.options.iconSize[0];
+      var iconHeight = marker.options.icon.options.iconSize[1];
+
+      if (pointPos.x < -iconWidth*2 || pointPos.y < -iconHeight*2 || pointPos.x > this._canvas.width + iconWidth*2 || pointPos.y > this._canvas.height + iconHeight*2) {
+        return;
+      }
 
       if (marker.options.icon.options.iconOrigin) {
         this._context.drawImage(
