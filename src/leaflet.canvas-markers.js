@@ -18,7 +18,7 @@
   var CanvasIconLayer = (L.Layer ? L.Layer : L.Class).extend({
     initialize: function (options) {
       this.imageCache = {};
-      this.zIndex = 0;
+      this._zIndex = 0;
 
       L.setOptions(this, options);
     },
@@ -123,7 +123,7 @@
 
     _drawImage: function (marker, pointPos) {
       this._context.globalAlpha = marker.options.opacity;
-      marker._zIndex = this.zIndex++;
+      marker._zIndex = this._zIndex++;
 
       if (marker.options.icon.options.iconOrigin) {
         this._context.drawImage(
@@ -162,7 +162,7 @@
 
     _redraw: function (clear) {
       this._frame = null;
-      this.zIndex = 0;
+      this._zIndex = 0;
 
       if (!this._map) {
           return;
@@ -181,6 +181,9 @@
 
     _initCanvas: function () {
       this._canvas = L.DomUtil.create('canvas', 'leaflet-canvas-icon-layer leaflet-layer');
+
+      // Match default marker zIndex
+      this._canvas.style.zIndex = 600;
 
       var size = this._map.getSize();
       this._canvas.width  = size.x;
