@@ -235,22 +235,49 @@
     },
 
     _updateMouseCursor: function(event) {
-      var markerHit = false;
+      var highestMarker = null;
 
       for (var markerId in this._markers) {
         var marker = this._markers[markerId];
         var point = this._map.latLngToContainerPoint(this._markers[markerId].getLatLng());
 
         if (marker.options.opacity > 0.0 && marker.options.icon && this._hit(marker, point, event)) {
-          markerHit = true;
-          break;
+          if (!highestMarker || marker._zIndex > highestMarker._zIndex) {
+            highestMarker = marker;
+          }
         }
       }
 
-      if (markerHit) {
+      if (highestMarker) {
         this._map._container.style.cursor = 'pointer';
+        if (highestMarker.options.title) this._showTooltip(highestMarker);
       } else {
         this._map._container.style.cursor = '';
+        this._hideTooltip();
+      }
+    },
+
+    _showTooltip(marker) {
+      if (!this._tooltip) {
+        this._tooltip = document.createElement('div');
+        this._tooltip.className = 'leaflet-canvas-tooltip';
+        this._canvas.parentNode.insertBefore(this._tooltip, this._canvas.nextSibling);
+      }
+
+      this._tooltip.style.display = 'block';
+
+      var markerPos = this._map.latLngToContainerPoint(marker.getLatLng());
+
+      this._tooltip.style.left = markerPos.x + 'px';
+      this._tooltip.style.top = markerPos.y + 'px';
+      this._tooltip.style.transform = this._canvas.style.transform;
+      this._tooltip.style.zIndex = 700;
+      this._tooltip.innerText = marker.options.title;
+    },
+
+    _hideTooltip() {
+      if (this._tooltip) {
+        this._tooltip.style.display = 'none';
       }
     },
 
