@@ -282,13 +282,17 @@
     },
 
     _hit: function(marker, point, event) {
-      var width = marker.options.icon.options.iconSize[0];
-      var height = marker.options.icon.options.iconSize[1];
-      var offsetWidth = marker.options.icon.options.iconAnchor[0];
-      var offsetHeight = marker.options.icon.options.iconAnchor[1];
-      var x = event.containerPoint.x;
-      var y = event.containerPoint.y;
-      return x >= point.x - offsetWidth && x <= point.x - offsetWidth + width && y >= point.y - offsetHeight && y <= point.y - offsetHeight + height;
+      if (marker.options.icon) {
+        var width = marker.options.icon.options.iconSize[0];
+        var height = marker.options.icon.options.iconSize[1];
+        var offsetWidth = marker.options.icon.options.iconAnchor[0];
+        var offsetHeight = marker.options.icon.options.iconAnchor[1];
+        var x = event.containerPoint.x;
+        var y = event.containerPoint.y;
+        return x >= point.x - offsetWidth && x <= point.x - offsetWidth + width && y >= point.y - offsetHeight && y <= point.y - offsetHeight + height;
+      } else {
+        return false;
+      }
     },
 
     /*
